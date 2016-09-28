@@ -2,7 +2,7 @@
 * @Author: LiuLei
 * @Date:   2016-09-28 10:23:26
 * @Last Modified by:   Administrator
-* @Last Modified time: 2016-09-28 13:36:54
+* @Last Modified time: 2016-09-28 15:20:29
 * @Function: node合并js，css文件
 */
 
@@ -20,7 +20,7 @@ const MIME = {
 function validateFiles(pathnames,callback){
 	(function next(i,length){
 		if(i<length){
-			fs.stat(pathnames[i],function(err,stat){
+			fs.stat(pathnames[i],(err,stat)=>{
 				if(err){
 					callback(err);
 				}else if(!stat.isFile()){
@@ -40,7 +40,7 @@ function outputFiles(pathnames,writer){
 		if(i<length){
 			let reader = fs.createReadStream(pathnames[i]);
 			reader.pipe(writer,{end:false});
-			reader.on('end',function(){
+			reader.on('end',()=>{
 				next(i+1,length);
 			})
 		}else{
@@ -64,7 +64,7 @@ function parseUrl(root,url){
 	let parts = url.split('??');
 	let	base = parts[0];
 	if(parts[1]===undefined) return undefined;
-	let	pathnames = parts[1].split(',').map(function(item){
+	let	pathnames = parts[1].split(',').map(item=>{
 			return path.join(root,base,item);
 		});
 	return{
@@ -83,11 +83,11 @@ function main(argv){
 		root = config.root || '.',
 		port = config.port || '8000';
 
-	let server = http.createServer(function(req,res){
+	let server = http.createServer((req,res)=>{
 		console.log(req.url)
 		let urlInfo = parseUrl(root,req.url);//req.url不带协议和域名
 		if(urlInfo!==undefined){
-			validateFiles(urlInfo.pathnames,function(err,data){
+			validateFiles(urlInfo.pathnames,(err,data)=>{
 				if (err) {
 					res.writeHead(404);
 					res.end(err.message);
@@ -99,8 +99,8 @@ function main(argv){
 		}
 		
 	}).listen(port);
-	process.on('SIGTERM',function(){
-		server.close(function(){
+	process.on('SIGTERM',()=>{
+		server.close(()=>{
 			process.exit(0);
 		})
 	})
